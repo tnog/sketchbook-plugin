@@ -1,123 +1,94 @@
 <?php
 /*
-Template Name: Work Archive Template
+Template Name: Sketchbook Pages 
 */
+
 get_header(); ?>
 
 
-  <!-- Secondary Nav Bar -->
-
- <?php tn_cstm_portfolio_menu(); ?>
-
-<!-- End Secondary Nav Bar -->
-
 <!-- Row for main content area -->
-  <div class="small-12 large-9 columns" role="main" >
+  <div class="full-width" role="main" >
         
-    <section id="featured" class="row" data-magellan-destination='featured'>
-
-      <h3>Featured</h3>
-      <hr>  
-
-        <div id="featured-work">
-              <ul data-orbit="" data-options="bullets:false;stack_on_small: true;" class="orbit-slides-container small-12 columns">
+    <section id="sketchbook-wall">
 
 
-                  <?php
-                  $args = array(
-                  'orderby'   => 'menu_order',
-                  'order'   => 'ASC',
-                  'post_type' => 'tn_cstm_portfolio',
-                  'meta_query' => array(
-                    array(
-                      'key' => 'featured_work',
-                      'value' => '"yes"',
-                      'compare' => 'LIKE'
-                      )
-                    )
-                  );
-                 $query = new WP_Query( $args );
-                 while ($query->have_posts()) : $query->the_post();
-                 ?>
-
-                <li>
-                  <div class="work-slide-container large-12 columns">
-                    <div class="large-6 small-12 columns">
-                       <a href="<? the_permalink()?>" rel="bookmark" title="<?php the_title(); ?>">
-                      <?php 
-                        tn_cstm_thumbnail_display(); 
-                     
-                        ?>
-                      </a>
-                    </div>
-                    <div class="large-6 columns">
-                      <h4>
-                      <a href="<? the_permalink()?>" rel="bookmark" title="<?php the_title(); ?>"><?php the_title(); ?></a>
-                      </h4>
-                      <p> <?php 
-                        $description = get_field('featured_excerpt');
-                        if($description) { 
-                          the_field('featured_excerpt');
-                        } ?>
-                      </p>
-                      <h5><a href="<? the_permalink()?>" rel="bookmark" title="<?php the_title(); ?>">Learn More</a></h5>
-                    </div>
-                  </div>
-                </li>
-                <?php endwhile; wp_reset_query(); ?>
-
-              </ul>
-          </div>
-      <hr>
-    </section>
-
-<!-- Begin custom tax loop -->
-  <?php
-
-    $categories = get_terms('tn_cstm_work_taxonomy','parent=0&order=DESC');
-    foreach ( $categories as $category ) : 
-    ?>
-      <div class="row">
-        <section id="<?php echo $category->slug; ?>" class="large-12 columns" data-magellan-destination='<?php echo $category->slug; ?>'> 
-           <h3><?php echo $category->name; ?></h3>
-
-           <ul class="large-block-grid-4 small-block-grid-2">
+       <ul id="sketchbook-container" class="large-block-grid-4">
             <?php 
-            $posts = get_posts(array(
-              'post_type' => 'tn_cstm_portfolio',
-              'orderby' => 'menu_order',
-              'order' =>  'ASC',
-              'taxonomy' => $category->taxonomy,
-              'term'  => $category->slug,
-              'nopaging' => true,
-              ));
-            
-            foreach($posts as $post) :
-              setup_postdata($post);
-            ?>
 
-              <li>
-                  <?php 
-                         if(function_exists('tn_cstm_work_thumb')) {
-                          tn_cstm_work_thumb(); 
-                        
-                        }
-                    
-                    ?>
-              </li>
-            
-            <?php endforeach; ?>
+            $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+            $args = array(
+              'post_type' => 'tn_cstm_sketchbook',
+              'orderby' => 'date',
+              'order' =>  'DESC',
+              'posts_per_page' => 8,
+              'paged'=> $paged 
+              );
+
+              $loop = new WP_Query($args);
+              while($loop->have_posts()) : $loop->the_post(); ?>
+              
+              <?php 
+                
+                if( has_post_thumbnail() ) :
+                  $sketch = get_post_thumbnail_id($post->ID);     
+                  $large_image = get_attachment_link( $sketch );
+                   ?>
+
+                  <li class="sketch-leaf">
+                    <figure class="sketch-thumb">
+    
+                      <a href="<?php echo $large_image; ?>" data-id="<?php the_ID(); ?>"  class="reveal" >
+                      <?php echo get_the_post_thumbnail($post->ID, 'medium-sketch'); ?>
+                      </a> 
+                      <figcaption>
+        
+                      </figcaption>
+
+                      </figure>
+                     
+                  </li>
+                <?php endif; ?>
+
+
+            <?php endwhile; ?>
       
           </ul>
-        </section>
-      </div><!-- .row -->     
 
-  <?php endforeach; ?>
+      <div class="row">
 
-  <!-- EOF nested custom tax loop -->
+        <div class="large-12 columns"> 
+
+          <nav id="sketchbook-nav" class="small-3 small-centered columns">
+            <?php
+            // Bring $wp_query into the scope of the function
+            global $wp_query;
+
+            // Backup the original property value
+            $backup_page_total = $wp_query->max_num_pages;
+
+            // Copy the custom query property to the $wp_query object
+            $wp_query->max_num_pages = $loop->max_num_pages;
+            ?>
+
+            <!-- now show the paging links -->
+            <div class="next-leaf alignleft"><?php next_posts_link('Next Entries'); ?></div>
+            <div class="previous-leaf alignright"><?php previous_posts_link('Previous Entries'); ?></div>
+
+            <?php
+            // Finally restore the $wp_query property to it's original value
+            $wp_query->max_num_pages = $backup_page_total;
+            ?>
+          </nav>
+        </div>
+      </div>
+      
+    </section>
+
+  
+
+
   
   </div>  <!-- End Content -->
-
 
 
 <?php get_footer(); ?>
