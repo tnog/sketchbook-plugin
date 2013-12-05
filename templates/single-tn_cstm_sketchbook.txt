@@ -1,0 +1,133 @@
+<?php get_header(); ?>
+
+
+<!-- Row for main content area -->
+	<div class="large-12 columns" role="main">		
+		
+		<?php /* Start loop */ ?>
+		<nav class="work-paging">
+
+				<span class="previous-work">
+					<?php previous_post_link_plus( array('order_by' => 'post_title') ); ?>
+				</span>
+				<span class="next-work"> 
+					<?php next_post_link_plus( array('order_by' => 'post_title') ); ?>
+				</span>
+			</nav>
+
+		<?php while (have_posts()) : the_post(); ?>
+
+			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
+				
+				<div class="row"> 
+					<section id="work-slides" class="large-8 columns push-4 entry-content">
+
+							<?php 
+
+							$images = get_field('gallery');
+ 
+							if( $images ): ?>
+						        <ul class="slides">
+						            <?php foreach( $images as $image ): ?>
+						                <li>
+						                	<figure>
+						                    	<img src="<?php echo $image['url']; ?>" alt="<?php echo $image['alt']; ?>" />
+						                    	<figcaption><p><?php echo $image['caption']; ?></p></figcaption>
+						                	</figure>
+						                </li>
+						            <?php endforeach; ?>
+						        </ul>
+							<?php endif; ?>		
+					</section>
+			
+					<aside class="large-4 pull-8 columns" >
+						<header>
+							<h2><?php the_title(); ?></h2>
+						</header>
+						<hr>
+							<section id="work-description">
+								<?php
+									if (get_field('description')) {
+										echo get_field('description');
+									}
+								?>
+							</section>
+							<section id="work-info">
+								<dl class="work-meta">
+									<?php
+										if (get_field('beginning-year') || get_field('end-year')) {
+											echo '<dt class="work-meta-title">YEAR</dt>
+											<dd>'; 
+										}
+										if (get_field('beginning-year')) {
+											echo get_field('beginning-year');
+										}
+
+										if (get_field('end-year')) {
+											echo '-'. get_field('end-year');
+										}
+										if (get_field('beginning-year') || get_field('end-year')) {
+											echo '<dd>';
+										}
+
+
+										if (get_field('company_type')) {
+											echo '<dt class="work-meta-title">'. get_field('company_type') . '</dt>'; 
+										}
+
+										if (get_field('company_name')) {	
+
+											echo '<dd>'. get_field('company_name') . '</dd>';
+										}
+
+										if (get_field('additional_info')) 
+
+										{
+											while(has_sub_field('additional_info'))
+
+											{
+
+												echo '<dt class="work-meta-title">'. get_sub_field('title') . '</dt>';
+
+												$text = get_sub_field('text');
+												$link = get_sub_field('link');
+
+												if ( $text && $link)
+
+												{
+													echo '<dd><a href="'. esc_url( $link ) .'">'. $text . '</a></dd>';
+
+												} else
+												{
+													echo '<dd>'. $text . '</dd>';
+												}
+											}
+										}
+									?>
+								</dl>
+							<section>
+						<hr>
+					</aside>
+
+				</div>
+		
+			</article>
+
+		<?php endwhile; // End the loop ?>
+
+			<nav class="work-paging">
+
+				<span class="previous-work">
+					<?php previous_post_link_plus( array('order_by' => 'post_title') ); ?>
+				</span>
+				<span class="next-work"> 
+					<?php next_post_link_plus( array('order_by' => 'post_title') ); ?>
+				</span>
+			</nav>
+
+
+	</div>
+
+		
+<?php get_footer(); ?>
+
